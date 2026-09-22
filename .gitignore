@@ -23,5 +23,13 @@
 hs_err_pid*
 replay_pid*
 
+# Diretório de build do Maven
+target/
+
+# Arquivos de IDE
+.vscode/
+.idea/
+*.iml
+
 # Configurações locais sensíveis
 db.properties
