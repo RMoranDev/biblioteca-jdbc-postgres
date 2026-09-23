@@ -1,49 +1,49 @@
 package com.biblioteca;
 
-import com.biblioteca.config.ConnectionFactory;
+import java.util.Optional;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import com.biblioteca.dao.UsuarioDAO;
+import com.biblioteca.dao.imp.UsuarioDAOImpl;
+import com.biblioteca.model.Usuario;
 
 public class Application {
 
     public static void main(String[] args) {
-        System.out.println("=== Testando Conexão com o PostgreSQL ===");
+        // CADASTRAR USUARIO
+        // UsuarioDAO userDAO = new UsuarioDAOImpl();
 
-        try (Connection conn = ConnectionFactory.getConnection()) {
-            if (conn != null && !conn.isClosed()) {
-                System.out.println("✓ Conexão estabelecida com sucesso!");
+        // Usuario user = new Usuario();
+        // user.setNome("Carlos Silva");
+        // user.setCpf("10000000019");
+        // user.setEmail("carlos.silva@email.com");
+        // user.setTelefone("41988887777");
 
-                // Exibe informações do banco de dados conectado
-                DatabaseMetaData metaData = conn.getMetaData();
-                System.out.println("Banco de Dados: " + metaData.getDatabaseProductName());
-                System.out.println("Versão: " + metaData.getDatabaseProductVersion());
-                System.out.println("Usuário: " + metaData.getUserName());
-                System.out.println("URL: " + metaData.getURL());
+        // userDAO.salvar(user);
 
-                // Teste de consulta simples na tabela livros
-                String sql = "SELECT COUNT(*) AS total FROM livros";
-                try (PreparedStatement stmt = conn.prepareStatement(sql);
-                     ResultSet rs = stmt.executeQuery()) {
 
-                    if (rs.next()) {
-                        long totalLivros = rs.getLong("total");
-                        System.out.println("✓ Tabela 'livros' acessível. Total de registros: " + totalLivros);
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("✗ Falha ao conectar ao banco de dados!");
-            System.err.println("Código de erro SQL: " + e.getSQLState());
-            System.err.println("Mensagem: " + e.getMessage());
-            e.printStackTrace();
-        } catch (Exception e) {
-            System.err.println("✗ Erro de configuração ou inicialização:");
-            System.err.println("Mensagem: " + e.getMessage());
-            e.printStackTrace();
+        // DELETAR USUARIO
+        UsuarioDAO usuarioDAO = new UsuarioDAOImpl();
+
+        Optional<Usuario> usuarioEncontrado = usuarioDAO.buscarPorId(1L);
+
+        // if (usuarioEncontrado.isPresent()) {
+        //     Usuario usuario = usuarioEncontrado.get();
+
+        //     usuarioDAO.deletar(usuario.getId());
+        //     System.out.println("Usuario deletado com sucesso!");
+
+        // } else {
+        //     System.out.println("Nenhum usuário encontrado com esse ID.");
+        // }
+
+        // BUSCAR USUARIO
+        if (usuarioEncontrado.isPresent()) {
+
+            Usuario usuario = usuarioEncontrado.get();
+            System.out.println(usuario);
+        } else {
+             System.out.println("Nenhum usuário encontrado com esse ID.");
         }
+
     }
 }
