@@ -30,10 +30,11 @@ public class Usuario {
     }
 
     // Construtor completo (usado pelo DAO ao mapear o ResultSet)
-    public Usuario(Long id, String nome, String email, String telefone, Boolean ativo,
+    public Usuario(Long id, String nome, String cpf, String email, String telefone, Boolean ativo,
             OffsetDateTime criadoEm, OffsetDateTime atualizadoEm) {
         this.id = id;
         this.nome = nome;
+        this.cpf = cpf;
         this.email = email;
         this.telefone = telefone;
         this.ativo = ativo;
@@ -133,7 +134,9 @@ public class Usuario {
         return "Usuario{" +
                 "id=" + id +
                 ", nome='" + nome + '\'' +
+                ", cpf='" + cpf + '\'' +
                 ", email='" + email + '\'' +
+                ", telefone='" + telefone + '\'' +
                 ", ativo=" + ativo +
                 '}';
     }
