@@ -1,6 +1,7 @@
-package com.biblioteca.dao.imp;
+package com.biblioteca.dao.impl;
 
 import java.sql.*;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -42,7 +43,7 @@ public class UsuarioDAOImpl implements UsuarioDAO {
             return usuario;
 
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao salvar usuário", e);
+            throw new DAOException("Erro ao salvar usuário", e);
         }
     }
 
@@ -50,8 +51,7 @@ public class UsuarioDAOImpl implements UsuarioDAO {
     public Optional<Usuario> buscarPorId(Long id) {
 
         if (id == null || id <= 0) {
-            throw new IllegalArgumentException(
-                    "ID deve ser maior que zero.");
+            return Optional.empty();
         }
 
         String sql = """
@@ -66,21 +66,14 @@ public class UsuarioDAOImpl implements UsuarioDAO {
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    var usuario = new Usuario();
-                    usuario.setId(rs.getLong("id"));
-                    usuario.setNome(rs.getString("nome"));
-                    usuario.setCpf(rs.getString("cpf"));
-                    usuario.setEmail(rs.getString("email"));
-                    usuario.setTelefone(rs.getString("telefone"));
-                    usuario.setAtivo(rs.getBoolean("ativo"));
-                    return Optional.of(usuario);
+                    return Optional.of(extrairUsuario(rs));
                 }
             }
 
             return Optional.empty();
 
         } catch (SQLException e) {
-            throw new DAOException("Erro ao buscar usuário no banco de dados.", e);
+            throw new DAOException("Erro ao buscar usuário pelo ID: " + id, e);
         }
     }
 
@@ -123,7 +116,7 @@ public class UsuarioDAOImpl implements UsuarioDAO {
     }
 
     @Override
-    public List<Usuario> listarTodos() {
+    public List<Usuario> buscarTodos() {
         List<Usuario> usuarios = new ArrayList<>();
 
         String sql = """
@@ -149,7 +142,7 @@ public class UsuarioDAOImpl implements UsuarioDAO {
             return usuarios;
 
         } catch (SQLException e) {
-            throw new DAOException("Erro ao listar usuários no banco de dados.", e);
+            throw new DAOException("Erro ao buscar usuários no banco de dados.", e);
         }
     }
 
@@ -204,6 +197,19 @@ public class UsuarioDAOImpl implements UsuarioDAO {
         } catch (SQLException e) {
             throw new DAOException("Erro ao apagar usuário no banco de dados.", e);
         }
+    }
+
+    private Usuario extrairUsuario(ResultSet rs) throws SQLException {
+        return new Usuario(
+            rs.getLong("id"),
+            rs.getString("nome"),
+            rs.getString("cpf"),
+            rs.getString("email"),
+            rs.getString("telefone"),
+            rs.getBoolean("ativo"),
+            rs.getObject("criado_em", OffsetDateTime.class),
+            rs.getObject("atualizado_em", OffsetDateTime.class)
+        );
     }
 
 }

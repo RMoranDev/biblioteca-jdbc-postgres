@@ -3,7 +3,7 @@ package com.biblioteca;
 import java.util.Optional;
 
 import com.biblioteca.dao.UsuarioDAO;
-import com.biblioteca.dao.imp.UsuarioDAOImpl;
+import com.biblioteca.dao.impl.UsuarioDAOImpl;
 import com.biblioteca.model.Usuario;
 
 public class Application {

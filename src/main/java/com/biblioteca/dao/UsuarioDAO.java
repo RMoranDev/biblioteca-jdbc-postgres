@@ -13,7 +13,7 @@ public interface UsuarioDAO {
 
     Optional<Usuario> buscarPorCpf(String cpf);
 
-    List<Usuario> listarTodos();
+    List<Usuario> buscarTodos();
 
     void atualizar(Usuario usuario);
 
