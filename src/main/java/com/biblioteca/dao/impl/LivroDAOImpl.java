@@ -68,7 +68,7 @@ public class LivroDAOImpl implements LivroDAO {
             }
             return Optional.empty();
         } catch (SQLException e) {
-            throw new DAOException("Erro ao buscar livro na base de dados", e);
+            throw new DAOException("Erro ao buscar livro na base de dados.", e);
         }
     }
 

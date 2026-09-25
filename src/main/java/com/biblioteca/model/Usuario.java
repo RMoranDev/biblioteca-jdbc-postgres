@@ -138,6 +138,8 @@ public class Usuario {
                 ", email='" + email + '\'' +
                 ", telefone='" + telefone + '\'' +
                 ", ativo=" + ativo +
+                ", criadoEm=" + criadoEm +
+                ", atualizadoEm=" + atualizadoEm +
                 '}';
     }
 

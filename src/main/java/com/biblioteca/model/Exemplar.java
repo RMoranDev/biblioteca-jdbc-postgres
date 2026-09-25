@@ -4,6 +4,10 @@ import java.time.OffsetDateTime;
 import java.util.Objects;
 
 public class Exemplar {
+
+    private static final int CODIGO_PATRIMONIO_MAX_LENGTH = 50;
+    private static final int OBSERVACOES_MAX_LENGTH = 255;
+
     private Long id;
     private Livro livro;
     private String codigoPatrimonio;
@@ -17,10 +21,10 @@ public class Exemplar {
 
     // Construtor para novo cadastro (status padrão DISPONIVEL)
     public Exemplar(Livro livro, String codigoPatrimonio, String observacoes) {
-        this.livro = livro;
-        this.codigoPatrimonio = codigoPatrimonio;
-        this.status = StatusExemplar.DISPONIVEL;
-        this.observacoes = observacoes;
+        setLivro(livro);
+        setCodigoPatrimonio(codigoPatrimonio);
+        setStatus(StatusExemplar.DISPONIVEL);
+        setObservacoes(observacoes);
     }
 
     // Construtor completo (para mapear do ResultSet do DAO)
@@ -48,6 +52,7 @@ public class Exemplar {
     }
 
     public void setLivro(Livro livro) {
+        validarLivro(livro);
         this.livro = livro;
     }
 
@@ -61,7 +66,8 @@ public class Exemplar {
     }
 
     public void setCodigoPatrimonio(String codigoPatrimonio) {
-        this.codigoPatrimonio = codigoPatrimonio;
+        validarCodigoPatrimonio(codigoPatrimonio);
+        this.codigoPatrimonio = codigoPatrimonio.trim();
     }
 
     public StatusExemplar getStatus() {
@@ -69,6 +75,7 @@ public class Exemplar {
     }
 
     public void setStatus(StatusExemplar status) {
+        validarStatus(status);
         this.status = status;
     }
 
@@ -77,7 +84,8 @@ public class Exemplar {
     }
 
     public void setObservacoes(String observacoes) {
-        this.observacoes = observacoes;
+        validarObservacoes(observacoes);
+        this.observacoes = observacoes != null ? observacoes.trim() : null;
     }
 
     public OffsetDateTime getCriadoEm() {
@@ -94,6 +102,39 @@ public class Exemplar {
 
     public void setAtualizadoEm(OffsetDateTime atualizadoEm) {
         this.atualizadoEm = atualizadoEm;
+    }
+
+    private void validarLivro(Livro livro) {
+        if (livro == null) {
+            throw new IllegalArgumentException("Livro não pode ser nulo.");
+        }
+
+        if (livro.getId() == null) {
+            throw new IllegalArgumentException("Livro deve possuir um ID.");
+        }
+    }
+
+    private void validarStatus(StatusExemplar status) {
+        if (status == null) {
+            throw new IllegalArgumentException("Status do exemplar não pode ser nulo.");
+        }
+    }
+
+    private void validarCodigoPatrimonio(String codigoPatrimonio) {
+        if (codigoPatrimonio == null || codigoPatrimonio.isBlank()) {
+            throw new IllegalArgumentException("Código de patrimônio não pode ser nulo ou vazio.");
+        }
+        if (codigoPatrimonio.length() > CODIGO_PATRIMONIO_MAX_LENGTH) {
+            throw new IllegalArgumentException(
+                    "Código de patrimônio excede o tamanho máximo de " + CODIGO_PATRIMONIO_MAX_LENGTH + " caracteres.");
+        }
+    }
+
+    private void validarObservacoes(String observacoes) {
+        if (observacoes != null && observacoes.length() > OBSERVACOES_MAX_LENGTH) {
+            throw new IllegalArgumentException(
+                    "Observações excede o tamanho máximo de " + OBSERVACOES_MAX_LENGTH + " caracteres.");
+        }
     }
 
     @Override
@@ -118,6 +159,7 @@ public class Exemplar {
                 ", livro=" + (livro != null ? livro.getTitulo() : "null") +
                 ", codigoPatrimonio='" + codigoPatrimonio + '\'' +
                 ", status=" + status +
+                ", observacoes='" + observacoes + '\'' +
                 ", criadoEm=" + criadoEm +
                 ", atualizadoEm=" + atualizadoEm +
                 '}';
