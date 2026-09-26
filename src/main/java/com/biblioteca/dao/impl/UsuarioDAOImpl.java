@@ -37,6 +37,8 @@ public class UsuarioDAOImpl implements UsuarioDAO {
             try (ResultSet rs = ps.getGeneratedKeys()) {
                 if (rs.next()) {
                     usuario.setId(rs.getLong(1));
+                } else {
+                    throw new DAOException("Não foi possível obter o ID gerado para o usuário.");
                 }
             }
 
@@ -49,13 +51,16 @@ public class UsuarioDAOImpl implements UsuarioDAO {
 
     @Override
     public Optional<Usuario> buscarPorId(Long id) {
-
-        if (id == null || id <= 0) {
-            return Optional.empty();
-        }
-
         String sql = """
-                    SELECT *
+                    SELECT
+                        id,
+                        nome,
+                        cpf,
+                        email,
+                        telefone,
+                        ativo,
+                        criado_em,
+                        atualizado_em
                     FROM usuarios
                     WHERE id = ?
                 """;
@@ -79,16 +84,18 @@ public class UsuarioDAOImpl implements UsuarioDAO {
 
     @Override
     public Optional<Usuario> buscarPorCpf(String cpf) {
-
-        if (cpf == null || cpf.isBlank()) {
-            throw new IllegalArgumentException(
-                    "CPF não pode ser nulo ou vazio.");
-        }
-
         String sql = """
-                    SELECT *
+                    SELECT
+                        id,
+                        nome,
+                        cpf,
+                        email,
+                        telefone,
+                        ativo,
+                        criado_em,
+                        atualizado_em
                     FROM usuarios
-                    WHERE cpf = ?
+                    WHERE id = ?
                 """;
         try (Connection conn = ConnectionFactory.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -97,14 +104,7 @@ public class UsuarioDAOImpl implements UsuarioDAO {
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    var usuario = new Usuario();
-                    usuario.setId(rs.getLong("id"));
-                    usuario.setNome(rs.getString("nome"));
-                    usuario.setCpf(rs.getString("cpf"));
-                    usuario.setEmail(rs.getString("email"));
-                    usuario.setTelefone(rs.getString("telefone"));
-                    usuario.setAtivo(rs.getBoolean("ativo"));
-                    return Optional.of(usuario);
+                    return Optional.of(extrairUsuario(rs));
                 }
             }
 
@@ -120,7 +120,15 @@ public class UsuarioDAOImpl implements UsuarioDAO {
         List<Usuario> usuarios = new ArrayList<>();
 
         String sql = """
-                    SELECT *
+                    SELECT
+                        id,
+                        nome,
+                        cpf,
+                        email,
+                        telefone,
+                        ativo,
+                        criado_em,
+                        atualizado_em
                     FROM usuarios
                 """;
         try (Connection conn = ConnectionFactory.getConnection();
@@ -128,14 +136,7 @@ public class UsuarioDAOImpl implements UsuarioDAO {
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    var usuario = new Usuario();
-                    usuario.setId(rs.getLong("id"));
-                    usuario.setNome(rs.getString("nome"));
-                    usuario.setCpf(rs.getString("cpf"));
-                    usuario.setEmail(rs.getString("email"));
-                    usuario.setTelefone(rs.getString("telefone"));
-                    usuario.setAtivo(rs.getBoolean("ativo"));
-                    usuarios.add(usuario);
+                    usuarios.add(extrairUsuario(rs));
                 }
             }
 
@@ -147,7 +148,7 @@ public class UsuarioDAOImpl implements UsuarioDAO {
     }
 
     @Override
-    public void atualizar(Usuario usuario) {
+    public boolean atualizar(Usuario usuario) {
         String sql = """
                             UPDATE usuarios
                 SET nome = ?,
@@ -155,7 +156,7 @@ public class UsuarioDAOImpl implements UsuarioDAO {
                     telefone = ?,
                     ativo = ?,
                     atualizado_em = NOW()
-                WHERE id = ?;
+                WHERE id = ?
                         """;
 
         try (Connection conn = ConnectionFactory.getConnection();
@@ -167,32 +168,25 @@ public class UsuarioDAOImpl implements UsuarioDAO {
             ps.setBoolean(4, usuario.isAtivo());
             ps.setLong(5, usuario.getId());
 
-            int linhasAfetadas = ps.executeUpdate();
-
-            if (linhasAfetadas == 0) {
-                throw new DAOException("Nenhum usuário encontrado com o ID: " + usuario.getId());
-            }
+            return ps.executeUpdate() > 0;
 
         } catch (SQLException e) {
             throw new DAOException("Erro ao atualizar usuário no banco de dados", e);
         }
     }
 
-    @Override 
-    public void deletar(Long id) {
-        if (id == null || id <= 0) {
-            throw new IllegalArgumentException("O ID deve ser maior do que zero!");
-        }   
-
+    @Override
+    public boolean deletar(Long id) {
         String sql = """
-            DELETE FROM usuarios
-            WHERE id = ?
-        """;
+                    DELETE FROM usuarios
+                    WHERE id = ?
+                """;
         try (Connection conn = ConnectionFactory.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setLong(1, id);
-            ps.executeUpdate();
+
+            return ps.executeUpdate() > 0;
 
         } catch (SQLException e) {
             throw new DAOException("Erro ao apagar usuário no banco de dados.", e);
@@ -201,15 +195,14 @@ public class UsuarioDAOImpl implements UsuarioDAO {
 
     private Usuario extrairUsuario(ResultSet rs) throws SQLException {
         return new Usuario(
-            rs.getLong("id"),
-            rs.getString("nome"),
-            rs.getString("cpf"),
-            rs.getString("email"),
-            rs.getString("telefone"),
-            rs.getBoolean("ativo"),
-            rs.getObject("criado_em", OffsetDateTime.class),
-            rs.getObject("atualizado_em", OffsetDateTime.class)
-        );
+                rs.getLong("id"),
+                rs.getString("nome"),
+                rs.getString("cpf"),
+                rs.getString("email"),
+                rs.getString("telefone"),
+                rs.getBoolean("ativo"),
+                rs.getObject("criado_em", OffsetDateTime.class),
+                rs.getObject("atualizado_em", OffsetDateTime.class));
     }
 
 }
