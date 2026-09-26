@@ -184,14 +184,14 @@ public class ExemplarDAOImpl implements ExemplarDAO {
 
     private Exemplar extrairExemplar(ResultSet rs) throws SQLException {
         Livro livro = new Livro(
-                rs.getLong("livro_id"),
-                rs.getString("livro_titulo"),
-                rs.getString("livro_autor"),
-                rs.getString("livro_isbn"),
-                rs.getInt("livro_ano_publicacao"),
-                rs.getString("livro_categoria"),
-                rs.getObject("livro_criado_em", OffsetDateTime.class),
-                rs.getObject("livro_atualizado_em", OffsetDateTime.class));
+                rs.getLong("id"),
+                rs.getString("titulo"),
+                rs.getString("autor"),
+                rs.getString("isbn"),
+                rs.getInt("ano_publicacao"),
+                rs.getString("categoria"),
+                rs.getObject("criado_em", OffsetDateTime.class),
+                rs.getObject("atualizado_em", OffsetDateTime.class));
 
         return new Exemplar(
                 rs.getLong("id"),

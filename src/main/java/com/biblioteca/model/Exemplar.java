@@ -31,10 +31,10 @@ public class Exemplar {
     public Exemplar(Long id, Livro livro, String codigoPatrimonio, StatusExemplar status,
             String observacoes, OffsetDateTime criadoEm, OffsetDateTime atualizadoEm) {
         this.id = id;
-        this.livro = livro;
-        this.codigoPatrimonio = codigoPatrimonio;
-        this.status = status;
-        this.observacoes = observacoes;
+        setLivro(livro);
+        setCodigoPatrimonio(codigoPatrimonio);
+        setStatus(StatusExemplar.DISPONIVEL);
+        setObservacoes(observacoes);
         this.criadoEm = criadoEm;
         this.atualizadoEm = atualizadoEm;
     }
