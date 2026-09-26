@@ -11,7 +11,7 @@ public interface ExemplarDAO {
 
     Optional<Exemplar> buscarPorId(Long id);
 
-    List<Exemplar> listarTodos();
+    List<Exemplar> buscarTodos();
 
     void atualizar(Exemplar exemplar);
 

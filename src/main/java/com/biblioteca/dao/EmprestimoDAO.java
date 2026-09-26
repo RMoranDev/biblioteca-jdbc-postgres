@@ -11,7 +11,7 @@ public interface EmprestimoDAO {
 
     Optional<Emprestimo> buscarPorId(Long id);
 
-    List<Emprestimo> listarTodos();
+    List<Emprestimo> buscarTodos();
 
     void atualizar(Emprestimo emprestimo);
 

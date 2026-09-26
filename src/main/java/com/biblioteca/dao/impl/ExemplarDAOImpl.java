@@ -92,7 +92,7 @@ public class ExemplarDAOImpl implements ExemplarDAO {
     }
 
     @Override
-    public List<Exemplar> listarTodos() {
+    public List<Exemplar> buscarTodos() {
         List<Exemplar> exemplares = new ArrayList<>();
 
         String sql = """

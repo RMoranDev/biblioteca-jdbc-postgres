@@ -123,7 +123,7 @@ public class EmprestimoDAOImpl implements EmprestimoDAO {
         }
     }
 
-    public List<Emprestimo> listarTodos() {
+    public List<Emprestimo> buscarTodos() {
         List<Emprestimo> emprestimo = new ArrayList<>();
 
         String sql = """

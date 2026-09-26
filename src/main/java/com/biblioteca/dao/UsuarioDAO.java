@@ -15,7 +15,7 @@ public interface UsuarioDAO {
 
     List<Usuario> buscarTodos();
 
-    void atualizar(Usuario usuario);
+    boolean atualizar(Usuario usuario);
 
-    void deletar(Long id);
+    boolean deletar(Long id);
 }
