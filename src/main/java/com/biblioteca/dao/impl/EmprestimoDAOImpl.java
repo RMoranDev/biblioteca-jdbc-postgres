@@ -19,6 +19,7 @@ import com.biblioteca.model.Usuario;
 
 public class EmprestimoDAOImpl implements EmprestimoDAO {
 
+    @Override
     public Emprestimo salvar(Emprestimo emprestimo) {
         String sql = """
                             INSERT INTO emprestimos (
@@ -39,7 +40,13 @@ public class EmprestimoDAOImpl implements EmprestimoDAO {
             ps.setLong(2, emprestimo.getUsuarioId());
             ps.setObject(3, emprestimo.getDataEmprestimo());
             ps.setObject(4, emprestimo.getDataPrevistaDevolucao());
-            ps.setObject(5, emprestimo.getDataDevolucaoEfetiva());
+
+            if (emprestimo.getDataDevolucaoEfetiva() != null) {
+                ps.setObject(5, emprestimo.getDataDevolucaoEfetiva());
+            } else {
+                ps.setNull(5, Types.TIMESTAMP_WITH_TIMEZONE);
+            }
+
             ps.setString(6, emprestimo.getStatus().name());
             ps.setBigDecimal(7, emprestimo.getMultaPaga());
 
@@ -58,6 +65,7 @@ public class EmprestimoDAOImpl implements EmprestimoDAO {
         }
     }
 
+    @Override
     public Optional<Emprestimo> buscarPorId(Long id) {
         String sql = """
                 SELECT
@@ -123,6 +131,7 @@ public class EmprestimoDAOImpl implements EmprestimoDAO {
         }
     }
 
+    @Override
     public List<Emprestimo> buscarTodos() {
         List<Emprestimo> emprestimo = new ArrayList<>();
 
@@ -178,11 +187,12 @@ public class EmprestimoDAOImpl implements EmprestimoDAO {
 
             return emprestimo;
 
-        } catch (Exception e) {
+        } catch (SQLException e) {
             throw new DAOException("Erro ao listar emprestimos no banco de dados.", e);
         }
     }
 
+    @Override
     public boolean atualizar(Emprestimo emprestimo) {
         String sql = """
                             UPDATE emprestimos
@@ -194,7 +204,7 @@ public class EmprestimoDAOImpl implements EmprestimoDAO {
                     data_devolucao_efetiva = ?,
                     status = ?,
                     multa_paga = ?
-                WHERE id = ?;
+                WHERE id = ?
                         """;
         try (Connection conn = ConnectionFactory.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -203,7 +213,13 @@ public class EmprestimoDAOImpl implements EmprestimoDAO {
             ps.setLong(2, emprestimo.getUsuarioId());
             ps.setObject(3, emprestimo.getDataEmprestimo());
             ps.setObject(4, emprestimo.getDataPrevistaDevolucao());
-            ps.setObject(5, emprestimo.getDataDevolucaoEfetiva());
+
+            if (emprestimo.getDataDevolucaoEfetiva() != null) {
+                ps.setObject(5, emprestimo.getDataDevolucaoEfetiva());
+            } else {
+                ps.setNull(5, Types.TIMESTAMP_WITH_TIMEZONE);
+            }
+            
             ps.setString(6, emprestimo.getStatus().name());
             ps.setBigDecimal(7, emprestimo.getMultaPaga());
             ps.setLong(8, emprestimo.getId());
@@ -215,6 +231,7 @@ public class EmprestimoDAOImpl implements EmprestimoDAO {
         }
     }
 
+    @Override
     public boolean deletar(Long id) {
         String sql = """
                     DELETE FROM emprestimos
@@ -226,7 +243,7 @@ public class EmprestimoDAOImpl implements EmprestimoDAO {
             ps.setLong(1, id);
 
             return ps.executeUpdate() > 0;
-            
+
         } catch (SQLException e) {
             throw new DAOException("Erro ao deletar o emprestimo de ID: " + id, e);
         }
@@ -248,7 +265,7 @@ public class EmprestimoDAOImpl implements EmprestimoDAO {
                 rs.getString("livro_titulo"),
                 rs.getString("livro_autor"),
                 rs.getString("livro_isbn"),
-                rs.getInt("livro_ano_publicacao"),
+                rs.getObject("livro_ano_publicacao", Integer.class),
                 rs.getString("livro_categoria"),
                 rs.getObject("livro_criado_em", OffsetDateTime.class),
                 rs.getObject("livro_atualizado_em", OffsetDateTime.class));

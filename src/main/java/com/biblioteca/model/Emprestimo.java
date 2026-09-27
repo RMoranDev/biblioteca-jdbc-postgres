@@ -17,11 +17,9 @@ public class Emprestimo {
     private OffsetDateTime criadoEm;
     private OffsetDateTime atualizadoEm;
 
-    // Construtor padrão
     public Emprestimo() {
     }
 
-    // Construtor para registrar um novo empréstimo
     public Emprestimo(Exemplar exemplar, Usuario usuario, LocalDate dataPrevistaDevolucao) {
         setExemplar(exemplar);
         setUsuario(usuario);
@@ -31,7 +29,6 @@ public class Emprestimo {
         this.multaPaga = BigDecimal.ZERO;
     }
 
-    // Construtor completo (usado pelo DAO para reconstruir a partir do ResultSet)
     public Emprestimo(Long id, Exemplar exemplar, Usuario usuario, OffsetDateTime dataEmprestimo,
             LocalDate dataPrevistaDevolucao, OffsetDateTime dataDevolucaoEfetiva,
             StatusEmprestimo status, BigDecimal multaPaga,
@@ -42,7 +39,7 @@ public class Emprestimo {
         validarDataPrevistaDevolucao(dataPrevistaDevolucao);
         validarStatus(status);
         validarMultaPaga(multaPaga);
-        
+
         this.id = id;
         this.exemplar = exemplar;
         this.usuario = usuario;
@@ -104,7 +101,7 @@ public class Emprestimo {
      */
     public void pagarMulta(BigDecimal valor) {
         validarMultaPaga(valor);
-        this.multaPaga = valor;
+        this.multaPaga = this.multaPaga.add(valor);
     }
 
     // Getters e Setters
@@ -171,17 +168,15 @@ public class Emprestimo {
         return status;
     }
 
-    /**
-     * Altera o status do empréstimo diretamente. Não permite a transição
-     * para DEVOLVIDO — use {@link #registrarDevolucao(OffsetDateTime)} para
-     * isso, pois essa transição precisa acontecer junto com o registro da
-     * data de devolução efetiva. Para cancelamento, prefira {@link #cancelar()}.
-     */
     public void setStatus(StatusEmprestimo status) {
         validarStatus(status);
         if (status == StatusEmprestimo.DEVOLVIDO) {
             throw new IllegalStateException(
                     "Use registrarDevolucao(OffsetDateTime) para marcar como devolvido.");
+        }
+        if (this.status == StatusEmprestimo.DEVOLVIDO) {
+            throw new IllegalStateException(
+                    "Não é possível alterar o status de um empréstimo já devolvido.");
         }
         this.status = status;
     }
