@@ -13,7 +13,7 @@ public interface ExemplarDAO {
 
     List<Exemplar> buscarTodos();
 
-    void atualizar(Exemplar exemplar);
+    boolean atualizar(Exemplar exemplar);
 
-    void deletar(Long id);
+    boolean deletar(Long id);
 }

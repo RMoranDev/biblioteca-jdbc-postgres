@@ -52,7 +52,15 @@ public class LivroDAOImpl implements LivroDAO {
     @Override
     public Optional<Livro> buscarPorId(Long id) {
         String sql = """
-                    SELECT *
+                    SELECT
+                        id,
+                        titulo,
+                        autor,
+                        isbn,
+                        ano_publicacao,
+                        categoria,
+                        criado_em,
+                        atualizado_em
                     FROM livros
                     WHERE id = ?
                 """;
@@ -77,7 +85,15 @@ public class LivroDAOImpl implements LivroDAO {
         List<Livro> livros = new ArrayList<>();
 
         String sql = """
-                    SELECT *
+                    SELECT
+                        id,
+                        titulo,
+                        autor,
+                        isbn,
+                        ano_publicacao,
+                        categoria,
+                        criado_em,
+                        atualizado_em
                     FROM livros
                 """;
         try (Connection conn = ConnectionFactory.getConnection();
@@ -96,7 +112,7 @@ public class LivroDAOImpl implements LivroDAO {
     }
 
     @Override
-    public void atualizar(Livro livro) {
+    public boolean atualizar(Livro livro) {
         String sql = """
                     UPDATE livros
                     SET titulo = ?,
@@ -115,19 +131,15 @@ public class LivroDAOImpl implements LivroDAO {
             ps.setString(5, livro.getCategoria());
             ps.setLong(6, livro.getId());
 
-            int linhasAfetadas = ps.executeUpdate();
-
-            if (linhasAfetadas == 0) {
-                throw new DAOException("Nenhum livro atualizado. ID não encontrado: " + livro.getId());
-            }
+            return ps.executeUpdate() > 0;
 
         } catch (SQLException e) {
-            throw new DAOException("Erro ao atualizar o livro de ID: " + livro.getId(), e);
+            throw new DAOException("Erro ao atualizar livro no banco de dados", e);
         }
     }
 
     @Override
-    public void deletar(Long id) {
+    public boolean deletar(Long id) {
         String sql = """
                     DELETE FROM livros
                     WHERE id = ?
@@ -137,14 +149,10 @@ public class LivroDAOImpl implements LivroDAO {
 
             ps.setLong(1, id);
 
-            int linhasAfetadas = ps.executeUpdate();
-
-            if (linhasAfetadas == 0) {
-                throw new DAOException("Nenhum livro deletado. ID não encontrado: " + id);
-            }
+            return ps.executeUpdate() > 0;
 
         } catch (SQLException e) {
-            throw new DAOException("Erro ao deletar o livro de ID: " + id, e);
+            throw new DAOException("Erro ao apagar livro no banco de dados.", e);
         }
     }
 

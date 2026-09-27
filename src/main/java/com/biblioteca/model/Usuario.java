@@ -2,7 +2,6 @@ package com.biblioteca.model;
 
 import java.time.OffsetDateTime;
 import java.util.Objects;
-
 import com.biblioteca.util.CpfValidator;
 
 public class Usuario {
@@ -12,7 +11,7 @@ public class Usuario {
     private String cpf;
     private String email;
     private String telefone;
-    private Boolean ativo;
+    private boolean ativo;
     private OffsetDateTime criadoEm;
     private OffsetDateTime atualizadoEm;
 
@@ -83,11 +82,11 @@ public class Usuario {
         this.telefone = telefone;
     }
 
-    public Boolean isAtivo() {
+    public boolean isAtivo() {
         return ativo;
     }
 
-    public void setAtivo(Boolean ativo) {
+    public void setAtivo(boolean ativo) {
         this.ativo = ativo;
     }
 
@@ -113,7 +112,7 @@ public class Usuario {
         }
         this.cpf = CpfValidator.apenasDigitos(cpf);
     }
-    
+
     @Override
     public boolean equals(Object o) {
         if (this == o)
@@ -121,12 +120,12 @@ public class Usuario {
         if (o == null || getClass() != o.getClass())
             return false;
         Usuario usuario = (Usuario) o;
-        return Objects.equals(id, usuario.id);
+        return Objects.equals(cpf, usuario.cpf);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(cpf);
     }
 
     @Override
@@ -134,7 +133,7 @@ public class Usuario {
         return "Usuario{" +
                 "id=" + id +
                 ", nome='" + nome + '\'' +
-                ", cpf='" + cpf + '\'' +
+                ", cpf='" + mascararCpf(cpf) + '\'' +
                 ", email='" + email + '\'' +
                 ", telefone='" + telefone + '\'' +
                 ", ativo=" + ativo +
@@ -142,5 +141,12 @@ public class Usuario {
                 ", atualizadoEm=" + atualizadoEm +
                 '}';
     }
+
+    private String mascararCpf(String cpf) {
+    if (cpf == null || cpf.length() != 11) {
+        return cpf;
+    }
+    return cpf.substring(0, 3) + ".***.***-" + cpf.substring(9);
+}
 
 }

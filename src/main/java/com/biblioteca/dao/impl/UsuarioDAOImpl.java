@@ -150,15 +150,15 @@ public class UsuarioDAOImpl implements UsuarioDAO {
     @Override
     public boolean atualizar(Usuario usuario) {
         String sql = """
-                            UPDATE usuarios
-                SET nome = ?,
+                UPDATE usuarios
+                SET id = ?
+                    nome = ?,
                     email = ?,
                     telefone = ?,
                     ativo = ?,
                     atualizado_em = NOW()
                 WHERE id = ?
-                        """;
-
+                """;
         try (Connection conn = ConnectionFactory.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
 

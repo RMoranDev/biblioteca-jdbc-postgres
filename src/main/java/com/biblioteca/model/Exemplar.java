@@ -33,7 +33,7 @@ public class Exemplar {
         this.id = id;
         setLivro(livro);
         setCodigoPatrimonio(codigoPatrimonio);
-        setStatus(StatusExemplar.DISPONIVEL);
+        setStatus(status);
         setObservacoes(observacoes);
         this.criadoEm = criadoEm;
         this.atualizadoEm = atualizadoEm;
@@ -144,12 +144,12 @@ public class Exemplar {
         if (o == null || getClass() != o.getClass())
             return false;
         Exemplar exemplar = (Exemplar) o;
-        return Objects.equals(id, exemplar.id);
+        return Objects.equals(codigoPatrimonio, exemplar.codigoPatrimonio);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(codigoPatrimonio);
     }
 
     @Override

@@ -13,7 +13,7 @@ public interface EmprestimoDAO {
 
     List<Emprestimo> buscarTodos();
 
-    void atualizar(Emprestimo emprestimo);
+    boolean atualizar(Emprestimo emprestimo);
 
-    void deletar(Long id);
+    boolean deletar(Long id);
 }

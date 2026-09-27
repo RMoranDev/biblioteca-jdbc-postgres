@@ -132,7 +132,7 @@ public class ExemplarDAOImpl implements ExemplarDAO {
     }
 
     @Override
-    public void atualizar(Exemplar exemplar) {
+    public boolean atualizar(Exemplar exemplar) {
         String sql = """
                 UPDATE exemplares
                 SET livro_id = ?,
@@ -150,11 +150,7 @@ public class ExemplarDAOImpl implements ExemplarDAO {
             ps.setString(4, exemplar.getObservacoes());
             ps.setLong(5, exemplar.getId());
 
-            int linhasAfetadas = ps.executeUpdate();
-
-            if (linhasAfetadas == 0) {
-                throw new DAOException("Nenhum exemplar atualizado. ID não encontrado: " + exemplar.getId());
-            }
+            return ps.executeUpdate() > 0;
 
         } catch (SQLException e) {
             throw new DAOException("Erro ao atualizar o exemplar de ID: " + exemplar.getId(), e);
@@ -162,7 +158,7 @@ public class ExemplarDAOImpl implements ExemplarDAO {
     }
 
     @Override
-    public void deletar(Long id) {
+    public boolean deletar(Long id) {
         String sql = """
                     DELETE FROM exemplares
                     WHERE id = ?
@@ -172,11 +168,8 @@ public class ExemplarDAOImpl implements ExemplarDAO {
 
             ps.setLong(1, id);
 
-            int linhasAfetadas = ps.executeUpdate();
+            return ps.executeUpdate() > 0;
 
-            if (linhasAfetadas == 0) {
-                throw new DAOException("Nenhum exemplar deletado. ID não encontrado: " + id);
-            }
         } catch (SQLException e) {
             throw new DAOException("Erro ao deletar o exemplar de ID: " + id, e);
         }
@@ -184,14 +177,14 @@ public class ExemplarDAOImpl implements ExemplarDAO {
 
     private Exemplar extrairExemplar(ResultSet rs) throws SQLException {
         Livro livro = new Livro(
-                rs.getLong("id"),
-                rs.getString("titulo"),
-                rs.getString("autor"),
-                rs.getString("isbn"),
-                rs.getInt("ano_publicacao"),
-                rs.getString("categoria"),
-                rs.getObject("criado_em", OffsetDateTime.class),
-                rs.getObject("atualizado_em", OffsetDateTime.class));
+                rs.getLong("livro_id"),
+                rs.getString("livro_titulo"),
+                rs.getString("livro_autor"),
+                rs.getString("livro_isbn"),
+                rs.getObject("livro_ano_publicacao", Integer.class),
+                rs.getString("livro_categoria"),
+                rs.getObject("livro_criado_em", OffsetDateTime.class),
+                rs.getObject("livro_atualizado_em", OffsetDateTime.class));
 
         return new Exemplar(
                 rs.getLong("id"),

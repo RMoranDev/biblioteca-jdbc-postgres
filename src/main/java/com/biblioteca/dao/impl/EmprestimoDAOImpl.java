@@ -183,7 +183,7 @@ public class EmprestimoDAOImpl implements EmprestimoDAO {
         }
     }
 
-    public void atualizar(Emprestimo emprestimo) {
+    public boolean atualizar(Emprestimo emprestimo) {
         String sql = """
                             UPDATE emprestimos
                 SET
@@ -208,17 +208,14 @@ public class EmprestimoDAOImpl implements EmprestimoDAO {
             ps.setBigDecimal(7, emprestimo.getMultaPaga());
             ps.setLong(8, emprestimo.getId());
 
-            int linhasAfetadas = ps.executeUpdate();
+            return ps.executeUpdate() > 0;
 
-            if (linhasAfetadas == 0) {
-                throw new DAOException("Nenhum emprestimo atualizado. ID não encontrado: " + emprestimo.getId());
-            }
         } catch (SQLException e) {
             throw new DAOException("Erro ao atualizar o emprestimo de ID: " + emprestimo.getId(), e);
         }
     }
 
-    public void deletar(Long id) {
+    public boolean deletar(Long id) {
         String sql = """
                     DELETE FROM emprestimos
                     WHERE id = ?
@@ -228,11 +225,8 @@ public class EmprestimoDAOImpl implements EmprestimoDAO {
 
             ps.setLong(1, id);
 
-            int linhasAfetadas = ps.executeUpdate();
-
-            if (linhasAfetadas == 0) {
-                throw new DAOException("Nenhum emprestimo deletado. ID não encontrado: " + id);
-            }
+            return ps.executeUpdate() > 0;
+            
         } catch (SQLException e) {
             throw new DAOException("Erro ao deletar o emprestimo de ID: " + id, e);
         }
