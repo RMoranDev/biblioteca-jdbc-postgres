@@ -80,6 +80,36 @@ public class LivroDAOImpl implements LivroDAO {
         }
     }
 
+    @Override 
+    public Optional<Livro> buscarPorIsbn(String isbn) {
+        String sql = """
+                SELECT
+                    id,
+                    titulo,
+                    autor,
+                    isbn,
+                    ano_publicacao,
+                    categoria,
+                    criado_em,
+                    atualizado_em
+                FROM livros
+                WHERE isbn = ?
+        """;
+        try (Connection conn = ConnectionFactory.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, isbn);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(extrairLivro(rs));
+                }
+            }
+
+            return Optional.empty();
+        } catch (SQLException e) {
+            throw new DAOException("Erro ao buscar livro pelo ISBN: " + isbn, e);
+        }
+    }
     @Override
     public List<Livro> buscarTodos() {
         List<Livro> livros = new ArrayList<>();

@@ -11,6 +11,8 @@ public interface LivroDAO {
 
     Optional<Livro> buscarPorId(Long id);
 
+    Optional<Livro> buscarPorIsbn(String isbn);
+
     List<Livro> buscarTodos();
 
     boolean atualizar(Livro livro);
