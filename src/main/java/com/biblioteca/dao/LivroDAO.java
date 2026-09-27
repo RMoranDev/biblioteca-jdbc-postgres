@@ -13,7 +13,7 @@ public interface LivroDAO {
 
     List<Livro> buscarTodos();
 
-    void atualizar(Livro livro);
+    boolean atualizar(Livro livro);
 
-    void deletar(Long id);
+    boolean deletar(Long id);
 }
