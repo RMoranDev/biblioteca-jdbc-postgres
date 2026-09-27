@@ -25,10 +25,20 @@ public class UsuarioService {
     }
 
     public Optional<Usuario> buscarPorId(Long id) {
+
+        if (id == null) {
+            throw new IllegalArgumentException("ID não pode ser nulo.");
+        }
+
         return usuarioDAO.buscarPorId(id);
     }
 
     public Optional<Usuario> buscarPorCpf(String cpf) {
+
+        if (cpf == null || cpf.isBlank()) {
+            throw new IllegalArgumentException("CPF não pode ser nulo ou vazio.");
+        }
+
         return usuarioDAO.buscarPorCpf(cpf);
     }
 
@@ -41,8 +51,7 @@ public class UsuarioService {
         Optional<Usuario> usuarioCPF = usuarioDAO.buscarPorCpf(usuario.getCpf());
 
         if (usuarioCPF.isPresent() && !usuarioCPF.get().getId().equals(usuario.getId())) {
-            throw new RegraNegocioException(
-                    "O CPF informado já está cadastrado.");
+            throw new RegraNegocioException("O CPF informado já está cadastrado.");
         }
 
         boolean atualizado = usuarioDAO.atualizar(usuario);
