@@ -45,7 +45,7 @@ public class UsuarioDAOImpl implements UsuarioDAO {
             return usuario;
 
         } catch (SQLException e) {
-            throw new DAOException("Erro ao salvar usuário", e);
+            throw new DAOException("Já existe um usuário com este CPF.", e);
         }
     }
 

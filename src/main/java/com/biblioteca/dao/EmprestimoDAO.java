@@ -16,4 +16,6 @@ public interface EmprestimoDAO {
     boolean atualizar(Emprestimo emprestimo);
 
     boolean deletar(Long id);
+
+    boolean existeEmprestimoEmAbertoPorUsuario(Long usuarioId);
 }

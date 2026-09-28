@@ -38,6 +38,8 @@ public class LivroDAOImpl implements LivroDAO {
             try (ResultSet rs = ps.getGeneratedKeys()) {
                 if (rs.next()) {
                     livro.setId(rs.getLong(1));
+                } else {
+                    throw new DAOException("Não foi possível obter o ID gerado para o livro.");
                 }
 
             }
@@ -80,23 +82,23 @@ public class LivroDAOImpl implements LivroDAO {
         }
     }
 
-    @Override 
+    @Override
     public Optional<Livro> buscarPorIsbn(String isbn) {
         String sql = """
-                SELECT
-                    id,
-                    titulo,
-                    autor,
-                    isbn,
-                    ano_publicacao,
-                    categoria,
-                    criado_em,
-                    atualizado_em
-                FROM livros
-                WHERE isbn = ?
-        """;
+                        SELECT
+                            id,
+                            titulo,
+                            autor,
+                            isbn,
+                            ano_publicacao,
+                            categoria,
+                            criado_em,
+                            atualizado_em
+                        FROM livros
+                        WHERE isbn = ?
+                """;
         try (Connection conn = ConnectionFactory.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, isbn);
 
             try (ResultSet rs = ps.executeQuery()) {
@@ -110,6 +112,7 @@ public class LivroDAOImpl implements LivroDAO {
             throw new DAOException("Erro ao buscar livro pelo ISBN: " + isbn, e);
         }
     }
+
     @Override
     public List<Livro> buscarTodos() {
         List<Livro> livros = new ArrayList<>();

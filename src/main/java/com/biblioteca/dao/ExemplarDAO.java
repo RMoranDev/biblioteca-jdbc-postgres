@@ -11,6 +11,10 @@ public interface ExemplarDAO {
 
     Optional<Exemplar> buscarPorId(Long id);
 
+    Optional<Exemplar> buscarPorCodigoPatrimonio(String codigoPatrimonio);
+
+    List<Exemplar> buscarPorLivro(Long livroId);
+
     List<Exemplar> buscarTodos();
 
     boolean atualizar(Exemplar exemplar);

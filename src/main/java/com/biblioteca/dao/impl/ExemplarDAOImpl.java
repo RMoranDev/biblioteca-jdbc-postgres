@@ -15,6 +15,28 @@ import com.biblioteca.model.StatusExemplar;
 
 public class ExemplarDAOImpl implements ExemplarDAO {
 
+    private static final String SELECT_EXEMPLAR = """
+            SELECT
+                e.id,
+                e.codigo_patrimonio,
+                e.status,
+                e.observacoes,
+                e.criado_em,
+                e.atualizado_em,
+
+                l.id AS livro_id,
+                l.titulo AS livro_titulo,
+                l.autor AS livro_autor,
+                l.isbn AS livro_isbn,
+                l.ano_publicacao AS livro_ano_publicacao,
+                l.categoria AS livro_categoria,
+                l.criado_em AS livro_criado_em,
+                l.atualizado_em AS livro_atualizado_em
+
+            FROM exemplares e
+            JOIN livros l ON l.id = e.livro_id
+            """;
+
     @Override
     public Exemplar salvar(Exemplar exemplar) {
         String sql = """
@@ -39,6 +61,8 @@ public class ExemplarDAOImpl implements ExemplarDAO {
             try (ResultSet rs = ps.getGeneratedKeys()) {
                 if (rs.next()) {
                     exemplar.setId(rs.getLong(1));
+                } else {
+                    throw new DAOException("Não foi possível obter o ID gerado para o exemplar.");
                 }
             }
 
@@ -51,28 +75,8 @@ public class ExemplarDAOImpl implements ExemplarDAO {
 
     @Override
     public Optional<Exemplar> buscarPorId(Long id) {
-        String sql = """
-                SELECT
-                    e.id,
-                    e.codigo_patrimonio,
-                    e.status,
-                    e.observacoes,
-                    e.criado_em,
-                    e.atualizado_em,
+        String sql = SELECT_EXEMPLAR + "WHERE e.id = ?";
 
-                    l.id AS livro_id,
-                    l.titulo AS livro_titulo,
-                    l.autor AS livro_autor,
-                    l.isbn AS livro_isbn,
-                    l.ano_publicacao AS livro_ano_publicacao,
-                    l.categoria AS livro_categoria,
-                    l.criado_em AS livro_criado_em,
-                    l.atualizado_em AS livro_atualizado_em
-
-                FROM exemplares e
-                JOIN livros l ON l.id = e.livro_id
-                WHERE e.id = ?
-                """;
         try (Connection conn = ConnectionFactory.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -92,30 +96,55 @@ public class ExemplarDAOImpl implements ExemplarDAO {
     }
 
     @Override
+    public Optional<Exemplar> buscarPorCodigoPatrimonio(String codigoPatrimonio) {
+        String sql = SELECT_EXEMPLAR + " WHERE e.codigo_patrimonio = ?";
+
+        try (Connection conn = ConnectionFactory.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, codigoPatrimonio);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(extrairExemplar(rs));
+                }
+            }
+
+            return Optional.empty();
+
+        } catch (SQLException e) {
+            throw new DAOException("Erro ao buscar exemplar pelo código de patrimônio.", e);
+        }
+    }
+
+    @Override
+    public List<Exemplar> buscarPorLivro(Long livroId) {
+        List<Exemplar> exemplares = new ArrayList<>();
+        String sql = SELECT_EXEMPLAR + " WHERE e.livro_id = ? ORDER BY e.id";
+
+        try (Connection conn = ConnectionFactory.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setLong(1, livroId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    exemplares.add(extrairExemplar(rs));
+                }
+            }
+
+            return exemplares;
+
+        } catch (SQLException e) {
+            throw new DAOException("Erro ao buscar exemplares do livro de ID: " + livroId, e);
+        }
+    }
+
+    @Override
     public List<Exemplar> buscarTodos() {
         List<Exemplar> exemplares = new ArrayList<>();
 
-        String sql = """
-                SELECT
-                    e.id,
-                    e.codigo_patrimonio,
-                    e.status,
-                    e.observacoes,
-                    e.criado_em,
-                    e.atualizado_em,
-
-                    l.id AS livro_id,
-                    l.titulo AS livro_titulo,
-                    l.autor AS livro_autor,
-                    l.isbn AS livro_isbn,
-                    l.ano_publicacao AS livro_ano_publicacao,
-                    l.categoria AS livro_categoria,
-                    l.criado_em AS livro_criado_em,
-                    l.atualizado_em AS livro_atualizado_em
-
-                FROM exemplares e
-                JOIN livros l ON l.id = e.livro_id
-                """;
+        String sql = SELECT_EXEMPLAR + " ORDER BY e.id";
         try (Connection conn = ConnectionFactory.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql);
                 ResultSet rs = ps.executeQuery()) {

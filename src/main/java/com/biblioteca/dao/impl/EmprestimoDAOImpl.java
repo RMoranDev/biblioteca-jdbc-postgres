@@ -55,13 +55,15 @@ public class EmprestimoDAOImpl implements EmprestimoDAO {
             try (ResultSet rs = ps.getGeneratedKeys()) {
                 if (rs.next()) {
                     emprestimo.setId(rs.getLong(1));
+                } else {
+                    throw new DAOException("Não foi possível obter o ID gerado para o empréstimo.");
                 }
             }
 
             return emprestimo;
 
         } catch (SQLException e) {
-            throw new DAOException("Erro ao salvar emprestimo na base de dados.", e);
+            throw new DAOException("Erro ao salvar empréstimo na base de dados.", e);
         }
     }
 
@@ -219,7 +221,7 @@ public class EmprestimoDAOImpl implements EmprestimoDAO {
             } else {
                 ps.setNull(5, Types.TIMESTAMP_WITH_TIMEZONE);
             }
-            
+
             ps.setString(6, emprestimo.getStatus().name());
             ps.setBigDecimal(7, emprestimo.getMultaPaga());
             ps.setLong(8, emprestimo.getId());
@@ -246,6 +248,30 @@ public class EmprestimoDAOImpl implements EmprestimoDAO {
 
         } catch (SQLException e) {
             throw new DAOException("Erro ao deletar o emprestimo de ID: " + id, e);
+        }
+    }
+
+    @Override
+    public boolean existeEmprestimoEmAbertoPorUsuario(Long usuarioId) {
+        String sql = """
+                SELECT 1
+                FROM emprestimos
+                WHERE usuario_id = ? AND status IN (?, ?)
+                LIMIT 1
+                """;
+        try (Connection conn = ConnectionFactory.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setLong(1, usuarioId);
+            ps.setString(2, StatusEmprestimo.ATIVO.name());
+            ps.setString(3, StatusEmprestimo.ATRASADO.name());
+
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+
+        } catch (SQLException e) {
+            throw new DAOException("Erro ao verificar empréstimos em aberto do usuário de ID: " + usuarioId, e);
         }
     }
 
