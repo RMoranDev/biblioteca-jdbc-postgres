@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Objects;
 
+import com.biblioteca.exception.RegraNegocioException;
+
 public class Emprestimo {
     private Long id;
     private Exemplar exemplar;
@@ -29,10 +31,17 @@ public class Emprestimo {
         this.multaPaga = BigDecimal.ZERO;
     }
 
-    public Emprestimo(Long id, Exemplar exemplar, Usuario usuario, OffsetDateTime dataEmprestimo,
-            LocalDate dataPrevistaDevolucao, OffsetDateTime dataDevolucaoEfetiva,
-            StatusEmprestimo status, BigDecimal multaPaga,
-            OffsetDateTime criadoEm, OffsetDateTime atualizadoEm) {
+    public Emprestimo(
+            Long id,
+            Exemplar exemplar,
+            Usuario usuario,
+            OffsetDateTime dataEmprestimo,
+            LocalDate dataPrevistaDevolucao,
+            OffsetDateTime dataDevolucaoEfetiva,
+            StatusEmprestimo status,
+            BigDecimal multaPaga,
+            OffsetDateTime criadoEm,
+            OffsetDateTime atualizadoEm) {
 
         validarExemplar(exemplar);
         validarUsuario(usuario);
@@ -52,53 +61,23 @@ public class Emprestimo {
         this.atualizadoEm = atualizadoEm;
     }
 
-    /**
-     * Registra a devolução do exemplar, atualizando o status e a data de
-     * devolução efetiva de forma atômica e consistente.
-     *
-     * @param dataDevolucao momento em que a devolução ocorreu
-     * @throws IllegalStateException    se o empréstimo já estiver devolvido ou
-     *                                  cancelado
-     * @throws IllegalArgumentException se a data for nula ou anterior à data do
-     *                                  empréstimo
-     */
     public void registrarDevolucao(OffsetDateTime dataDevolucao) {
-        if (this.status == StatusEmprestimo.DEVOLVIDO) {
-            throw new IllegalStateException("Este empréstimo já foi devolvido.");
-        }
-        if (this.status == StatusEmprestimo.CANCELADO) {
-            throw new IllegalStateException("Não é possível devolver um empréstimo cancelado.");
-        }
-        if (dataDevolucao == null) {
-            throw new IllegalArgumentException("Data de devolução não pode ser nula.");
-        }
-        if (this.dataEmprestimo != null && dataDevolucao.isBefore(this.dataEmprestimo)) {
-            throw new IllegalArgumentException(
-                    "Data de devolução não pode ser anterior à data do empréstimo.");
-        }
-
+        exigirAtivo("devolver");
         this.dataDevolucaoEfetiva = dataDevolucao;
         this.status = StatusEmprestimo.DEVOLVIDO;
     }
 
-    /**
-     * Cancela o empréstimo. Não é permitido cancelar um empréstimo que já
-     * foi devolvido.
-     *
-     * @throws IllegalStateException se o empréstimo já estiver devolvido
-     */
     public void cancelar() {
-        if (this.status == StatusEmprestimo.DEVOLVIDO) {
-            throw new IllegalStateException("Não é possível cancelar um empréstimo já devolvido.");
-        }
+        exigirAtivo("cancelar");
         this.status = StatusEmprestimo.CANCELADO;
     }
 
-    /**
-     * Registra o pagamento de multa referente a este empréstimo.
-     *
-     * @param valor valor pago, deve ser maior ou igual a zero
-     */
+    private void exigirAtivo(String acao) {
+        if (status != StatusEmprestimo.ATIVO) {
+            throw new RegraNegocioException("Só é possível " + acao + " empréstimos ativos.");
+        }
+    }
+
     public void pagarMulta(BigDecimal valor) {
         validarMultaPaga(valor);
         this.multaPaga = this.multaPaga.add(valor);

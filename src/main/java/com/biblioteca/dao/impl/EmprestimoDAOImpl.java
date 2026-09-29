@@ -235,6 +235,28 @@ public class EmprestimoDAOImpl implements EmprestimoDAO {
         }
     }
 
+    @Override
+    public boolean existeEmprestimoPorExemplar(Long exemplarId) {
+        String sql = """
+                SELECT 1
+                FROM emprestimos
+                WHERE exemplar_id = ?
+                LIMIT 1
+                """;
+        try (Connection conn = ConnectionFactory.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setLong(1, exemplarId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+
+        } catch (SQLException e) {
+            throw new DAOException("Erro ao verificar empréstimos do exemplar de ID: " + exemplarId, e);
+        }
+    }
+
     private Emprestimo extrairEmprestimo(ResultSet rs) throws SQLException {
         Usuario usuario = new Usuario(
                 rs.getLong("usuario_id"),

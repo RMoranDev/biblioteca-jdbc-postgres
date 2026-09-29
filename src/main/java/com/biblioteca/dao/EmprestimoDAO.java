@@ -18,4 +18,6 @@ public interface EmprestimoDAO {
     boolean deletar(Long id);
 
     boolean existeEmprestimoEmAbertoPorUsuario(Long usuarioId);
+
+    boolean existeEmprestimoPorExemplar(Long exemplarId);
 }
