@@ -261,39 +261,11 @@ O script de criação das tabelas e estruturas do banco está disponível em:
 src/main/resources/schema.sql
 ```
 
-Após criar o banco, conecte-se a ele:
-
-```bash
-psql -U postgres -d biblioteca
-```
-
-### 3. Configurar a conexão
-
-As credenciais do banco devem ficar em um arquivo de configuração local e **não devem ser versionadas**.
-
-Exemplo:
-
-```properties
-db.url=jdbc:postgresql://localhost:5432/biblioteca
-db.user=postgres
-db.password=sua_senha
-```
-
-### 4. Criar as tabelas
-
-Execute o script SQL correspondente ao banco da aplicação.
-
-Exemplo:
-
-```bash
-psql -U postgres -d biblioteca -f schema.sql
-```
-
 Caso esteja utilizando uma ferramenta gráfica, como pgAdmin, o mesmo script pode ser executado diretamente pelo editor SQL.
 
 ---
 
-### 5. Compilar o projeto
+### 4. Compilar o projeto
 
 Utilize o Maven:
 
@@ -309,7 +281,7 @@ mvn clean package
 
 ---
 
-### 6. Executar a aplicação
+### 5. Executar a aplicação
 
 A aplicação pode ser executada pela classe principal configurada no projeto através da sua IDE.
 
@@ -347,78 +319,6 @@ Onde:
 | Database | `biblioteca` |
 | Usuário | `postgres` |
 | Driver | `org.postgresql.Driver` |
-
----
-
-## Scripts SQL
-
-O modelo de dados de uma aplicação de biblioteca normalmente envolve entidades relacionadas, como livros, usuários, exemplares e empréstimos.
-
-Um exemplo simplificado de estrutura é:
-
-```sql
-CREATE TABLE livro (
-    id BIGSERIAL PRIMARY KEY,
-    titulo VARCHAR(200) NOT NULL,
-    autor VARCHAR(150) NOT NULL,
-    isbn VARCHAR(20) UNIQUE,
-    ano_publicacao INTEGER
-);
-
-CREATE TABLE usuario (
-    id BIGSERIAL PRIMARY KEY,
-    nome VARCHAR(150) NOT NULL,
-    email VARCHAR(150) UNIQUE NOT NULL
-);
-
-CREATE TABLE exemplar (
-    id BIGSERIAL PRIMARY KEY,
-    livro_id BIGINT NOT NULL,
-    status VARCHAR(30) NOT NULL,
-
-    CONSTRAINT fk_exemplar_livro
-        FOREIGN KEY (livro_id)
-        REFERENCES livro(id)
-);
-
-CREATE TABLE emprestimo (
-    id BIGSERIAL PRIMARY KEY,
-    usuario_id BIGINT NOT NULL,
-    exemplar_id BIGINT NOT NULL,
-    data_emprestimo DATE NOT NULL,
-    data_devolucao DATE,
-
-    CONSTRAINT fk_emprestimo_usuario
-        FOREIGN KEY (usuario_id)
-        REFERENCES usuario(id),
-
-    CONSTRAINT fk_emprestimo_exemplar
-        FOREIGN KEY (exemplar_id)
-        REFERENCES exemplar(id)
-);
-```
-
-### Relacionamentos
-
-```text
-USUARIO
-   │
-   │ 1:N
-   ▼
-EMPRESTIMO
-   │
-   │ N:1
-   ▼
-EXEMPLAR
-   │
-   │ N:1
-   ▼
-LIVRO
-```
-
-> O SQL acima é um modelo de referência para representar o domínio de uma biblioteca. O schema efetivamente utilizado pelo projeto deve ser considerado a fonte de verdade da aplicação.
-
----
 
 ## JDBC na prática
 
@@ -520,26 +420,48 @@ Em ambientes de produção, prefira utilizar variáveis de ambiente ou um sistem
 
 ## Melhorias Futuras
 
-Este projeto pode evoluir posteriormente para uma arquitetura backend mais próxima de aplicações utilizadas em ambientes profissionais.
+## Podem quebrar em uso real
 
-Possíveis evoluções:
+- LivroService.deletar e a FK. Livro com exemplares: o usuário recebe 
+RegraNegocioException ou DAOException técnico? É o mesmo problema que resolvemos no deletar do Exemplar.
 
-- [ ] API REST com Spring Boot;
-- [ ] Spring Data JPA / Hibernate;
-- [ ] DTOs;
-- [ ] Bean Validation;
-- [ ] Tratamento global de exceções;
-- [ ] Spring Security;
-- [ ] Autenticação com JWT;
-- [ ] Testes unitários mais abrangentes;
-- [ ] Testes de integração;
-- [ ] Docker;
-- [ ] Docker Compose;
-- [ ] PostgreSQL em container;
-- [ ] Documentação da API com OpenAPI/Swagger;
-- [ ] CI/CD com GitHub Actions.
+- Status inicial do Exemplar. Quem garante DISPONIVEL no cadastrar? Olhe o construtor do modelo e o INSERT do DAO.
 
----
+- Nome da coluna exemplar_id. Confira no script SQL, porque eu assumi.
+
+-  Quem instancia o ExemplarService. O construtor ganhou o EmprestimoDAO, então o Main ou a fábrica precisa ser atualizado, senão não compila.
+
+## Consistência entre os Services
+
+- Retorno do DAO ignorado. Livro e Usuario conferem o boolean no atualizar. Exemplar não confere. O deletar dos três também não confere.
+
+- Exceção de "não encontrado" do Exemplar. Ela é uma RegraNegocioException genérica, e a mensagem imprime o nome completo da classe.
+
+- validarId copiado em três lugares, e chamado duas vezes no deletar/atualizar de Livro e Usuario.
+
+## Design
+
+- Estados sem saída (PERDIDO e EM_MANUTENCAO). Só importa quando surgir a tela de acervo.
+
+- Concorrência. A regra "consulta e depois grava" precisa de restrição UNIQUE no banco. Você tem uma para codigo_patrimonio, isbn e cpf?
+
+## Próximos métodos
+
+```java
+int contarAtivosPorUsuario(Long usuarioId);
+boolean existeAtrasadoPorUsuario(Long usuarioId, LocalDate hoje);
+
+private static final int MAX_EMPRESTIMOS_ATIVOS = 3;
+
+private void validarUsuario(Usuario usuario) {
+    if (emprestimoDAO.contarAtivosPorUsuario(usuario.getId()) >= MAX_EMPRESTIMOS_ATIVOS) {
+        throw new RegraNegocioException("Usuário atingiu o limite de empréstimos ativos.");
+    }
+    if (emprestimoDAO.existeAtrasadoPorUsuario(usuario.getId(), LocalDate.now())) {
+        throw new RegraNegocioException("Usuário possui empréstimo atrasado.");
+    }
+}
+```
 
 ## Contribuição
 
