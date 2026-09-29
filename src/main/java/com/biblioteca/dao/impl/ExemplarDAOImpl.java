@@ -75,8 +75,7 @@ public class ExemplarDAOImpl implements ExemplarDAO {
 
     @Override
     public Optional<Exemplar> buscarPorId(Long id) {
-        String sql = SELECT_EXEMPLAR + "WHERE e.id = ?";
-
+        String sql = SELECT_EXEMPLAR + " WHERE e.id = ?";
         try (Connection conn = ConnectionFactory.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
 

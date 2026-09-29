@@ -18,6 +18,52 @@ import com.biblioteca.model.StatusExemplar;
 import com.biblioteca.model.Usuario;
 
 public class EmprestimoDAOImpl implements EmprestimoDAO {
+    private static final String SELECT_EMPRESTIMO = """
+            SELECT
+                -- Empréstimo
+                e.id AS emprestimo_id,
+                e.data_emprestimo,
+                e.data_prevista_devolucao,
+                e.data_devolucao_efetiva,
+                e.status AS emprestimo_status,
+                e.multa_paga,
+                e.criado_em AS emprestimo_criado_em,
+                e.atualizado_em AS emprestimo_atualizado_em,
+
+                -- Exemplar
+                ex.id AS exemplar_id,
+                ex.codigo_patrimonio,
+                ex.status AS exemplar_status,
+                ex.observacoes,
+                ex.criado_em AS exemplar_criado_em,
+                ex.atualizado_em AS exemplar_atualizado_em,
+
+                -- Livro
+                l.id AS livro_id,
+                l.titulo AS livro_titulo,
+                l.autor AS livro_autor,
+                l.isbn AS livro_isbn,
+                l.ano_publicacao AS livro_ano_publicacao,
+                l.categoria AS livro_categoria,
+                l.criado_em AS livro_criado_em,
+                l.atualizado_em AS livro_atualizado_em,
+
+                -- Usuário
+                u.id AS usuario_id,
+                u.nome AS usuario_nome,
+                u.cpf AS usuario_cpf,
+                u.email AS usuario_email,
+                u.telefone AS usuario_telefone,
+                u.ativo AS usuario_ativo,
+                u.criado_em AS usuario_criado_em,
+                u.atualizado_em AS usuario_atualizado_em
+
+            FROM emprestimos e
+            JOIN exemplares ex ON ex.id = e.exemplar_id
+            JOIN livros l ON l.id = ex.livro_id
+            JOIN usuarios u ON u.id = e.usuario_id
+            WHERE e.id = ?
+            """;
 
     @Override
     public Emprestimo salvar(Emprestimo emprestimo) {
@@ -69,52 +115,7 @@ public class EmprestimoDAOImpl implements EmprestimoDAO {
 
     @Override
     public Optional<Emprestimo> buscarPorId(Long id) {
-        String sql = """
-                SELECT
-                    -- Empréstimo
-                    e.id AS emprestimo_id,
-                    e.data_emprestimo,
-                    e.data_prevista_devolucao,
-                    e.data_devolucao_efetiva,
-                    e.status AS emprestimo_status,
-                    e.multa_paga,
-                    e.criado_em AS emprestimo_criado_em,
-                    e.atualizado_em AS emprestimo_atualizado_em,
-
-                    -- Exemplar
-                    ex.id AS exemplar_id,
-                    ex.codigo_patrimonio,
-                    ex.status AS exemplar_status,
-                    ex.observacoes,
-                    ex.criado_em AS exemplar_criado_em,
-                    ex.atualizado_em AS exemplar_atualizado_em,
-
-                    -- Livro
-                    l.id AS livro_id,
-                    l.titulo AS livro_titulo,
-                    l.autor AS livro_autor,
-                    l.isbn AS livro_isbn,
-                    l.ano_publicacao AS livro_ano_publicacao,
-                    l.categoria AS livro_categoria,
-                    l.criado_em AS livro_criado_em,
-                    l.atualizado_em AS livro_atualizado_em,
-
-                    -- Usuário
-                    u.id AS usuario_id,
-                    u.nome AS usuario_nome,
-                    u.cpf AS usuario_cpf,
-                    u.email AS usuario_email,
-                    u.telefone AS usuario_telefone,
-                    u.ativo AS usuario_ativo,
-                    u.criado_em AS usuario_criado_em,
-                    u.atualizado_em AS usuario_atualizado_em
-
-                FROM emprestimos e
-                JOIN exemplares ex ON ex.id = e.exemplar_id
-                JOIN livros l ON l.id = ex.livro_id
-                JOIN usuarios u ON u.id = e.usuario_id
-                WHERE e.id = ?
-                """;
+        String sql = SELECT_EMPRESTIMO + " WHERE e.id = ?";
         try (Connection conn = ConnectionFactory.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -137,48 +138,7 @@ public class EmprestimoDAOImpl implements EmprestimoDAO {
     public List<Emprestimo> buscarTodos() {
         List<Emprestimo> emprestimo = new ArrayList<>();
 
-        String sql = """
-                    SELECT
-                    e.id AS emprestimo_id,
-                    e.data_emprestimo,
-                    e.data_prevista_devolucao,
-                    e.data_devolucao_efetiva,
-                    e.status AS emprestimo_status,
-                    e.multa_paga,
-                    e.criado_em AS emprestimo_criado_em,
-                    e.atualizado_em AS emprestimo_atualizado_em,
-
-                    ex.id AS exemplar_id,
-                    ex.codigo_patrimonio,
-                    ex.status AS exemplar_status,
-                    ex.observacoes,
-                    ex.criado_em AS exemplar_criado_em,
-                    ex.atualizado_em AS exemplar_atualizado_em,
-
-                    l.id AS livro_id,
-                    l.titulo AS livro_titulo,
-                    l.autor AS livro_autor,
-                    l.isbn AS livro_isbn,
-                    l.ano_publicacao AS livro_ano_publicacao,
-                    l.categoria AS livro_categoria,
-                    l.criado_em AS livro_criado_em,
-                    l.atualizado_em AS livro_atualizado_em,
-
-                    u.id AS usuario_id,
-                    u.nome AS usuario_nome,
-                    u.cpf AS usuario_cpf,
-                    u.email AS usuario_email,
-                    u.telefone AS usuario_telefone,
-                    u.ativo AS usuario_ativo,
-                    u.criado_em AS usuario_criado_em,
-                    u.atualizado_em AS usuario_atualizado_em
-
-                FROM emprestimos e
-                JOIN exemplares ex ON ex.id = e.exemplar_id
-                JOIN livros l ON l.id = ex.livro_id
-                JOIN usuarios u ON u.id = e.usuario_id
-                ORDER BY e.id
-                """;
+        String sql = SELECT_EMPRESTIMO + " ORDER BY e.id";
         try (Connection conn = ConnectionFactory.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql);
                 ResultSet rs = ps.executeQuery()) {

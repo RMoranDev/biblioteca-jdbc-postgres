@@ -13,6 +13,19 @@ import com.biblioteca.model.Usuario;
 
 public class UsuarioDAOImpl implements UsuarioDAO {
 
+    private static final String SELECT_USUARIO = """
+            SELECT
+                id,
+                nome,
+                cpf,
+                email,
+                telefone,
+                ativo,
+                criado_em,
+                atualizado_em
+            FROM usuarios
+            """;
+
     @Override
     public Usuario salvar(Usuario usuario) {
         String sql = """
@@ -51,19 +64,7 @@ public class UsuarioDAOImpl implements UsuarioDAO {
 
     @Override
     public Optional<Usuario> buscarPorId(Long id) {
-        String sql = """
-                    SELECT
-                        id,
-                        nome,
-                        cpf,
-                        email,
-                        telefone,
-                        ativo,
-                        criado_em,
-                        atualizado_em
-                    FROM usuarios
-                    WHERE id = ?
-                """;
+        String sql = SELECT_USUARIO + " WHERE id = ?";
         try (Connection conn = ConnectionFactory.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -84,19 +85,7 @@ public class UsuarioDAOImpl implements UsuarioDAO {
 
     @Override
     public Optional<Usuario> buscarPorCpf(String cpf) {
-        String sql = """
-                    SELECT
-                        id,
-                        nome,
-                        cpf,
-                        email,
-                        telefone,
-                        ativo,
-                        criado_em,
-                        atualizado_em
-                    FROM usuarios
-                    WHERE id = ?
-                """;
+        String sql = SELECT_USUARIO + " WHERE id = ?";
         try (Connection conn = ConnectionFactory.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -119,18 +108,7 @@ public class UsuarioDAOImpl implements UsuarioDAO {
     public List<Usuario> buscarTodos() {
         List<Usuario> usuarios = new ArrayList<>();
 
-        String sql = """
-                    SELECT
-                        id,
-                        nome,
-                        cpf,
-                        email,
-                        telefone,
-                        ativo,
-                        criado_em,
-                        atualizado_em
-                    FROM usuarios
-                """;
+        String sql = SELECT_USUARIO + " ORDER BY id";
         try (Connection conn = ConnectionFactory.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
 

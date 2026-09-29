@@ -13,6 +13,19 @@ import com.biblioteca.model.Livro;
 
 public class LivroDAOImpl implements LivroDAO {
 
+    private static final String SELECT_LIVRO = """
+            SELECT
+                id,
+                titulo,
+                autor,
+                isbn,
+                ano_publicacao,
+                categoria,
+                criado_em,
+                atualizado_em
+            FROM livros
+            """;
+
     @Override
     public Livro salvar(Livro livro) {
         String sql = """
@@ -53,19 +66,7 @@ public class LivroDAOImpl implements LivroDAO {
 
     @Override
     public Optional<Livro> buscarPorId(Long id) {
-        String sql = """
-                    SELECT
-                        id,
-                        titulo,
-                        autor,
-                        isbn,
-                        ano_publicacao,
-                        categoria,
-                        criado_em,
-                        atualizado_em
-                    FROM livros
-                    WHERE id = ?
-                """;
+        String sql = SELECT_LIVRO + " WHERE id = ?";
         try (Connection conn = ConnectionFactory.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -84,19 +85,7 @@ public class LivroDAOImpl implements LivroDAO {
 
     @Override
     public Optional<Livro> buscarPorIsbn(String isbn) {
-        String sql = """
-                        SELECT
-                            id,
-                            titulo,
-                            autor,
-                            isbn,
-                            ano_publicacao,
-                            categoria,
-                            criado_em,
-                            atualizado_em
-                        FROM livros
-                        WHERE isbn = ?
-                """;
+        String sql = SELECT_LIVRO + " WHERE isbn = ?";
         try (Connection conn = ConnectionFactory.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, isbn);
@@ -117,18 +106,7 @@ public class LivroDAOImpl implements LivroDAO {
     public List<Livro> buscarTodos() {
         List<Livro> livros = new ArrayList<>();
 
-        String sql = """
-                    SELECT
-                        id,
-                        titulo,
-                        autor,
-                        isbn,
-                        ano_publicacao,
-                        categoria,
-                        criado_em,
-                        atualizado_em
-                    FROM livros
-                """;
+        String sql = SELECT_LIVRO + " ORDER BY id";
         try (Connection conn = ConnectionFactory.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql);
                 ResultSet rs = ps.executeQuery()) {
