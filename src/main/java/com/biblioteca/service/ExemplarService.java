@@ -2,6 +2,7 @@ package com.biblioteca.service;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.List;
 
 import com.biblioteca.dao.EmprestimoDAO;
 import com.biblioteca.dao.ExemplarDAO;
@@ -35,6 +36,10 @@ public class ExemplarService {
         Optional<Exemplar> exemplar = this.exemplarDAO.buscarPorId(id);
         return exemplar.orElseThrow(() -> new RegraNegocioException(
                 "Exemplar não encontrado! ID: " + id + ", Tipo: " + Exemplar.class.getSimpleName()));
+    }
+
+    public List<Exemplar> buscarTodos() {
+        return exemplarDAO.buscarTodos();
     }
 
     public Exemplar cadastrar(Exemplar exemplar) {

@@ -3,24 +3,31 @@ package com.biblioteca.ui;
 import java.util.Scanner;
 
 public class MenuPrincipal {
-
     private final Scanner scanner;
+    private final MenuLivro menuLivro;
+    private final MenuUsuario menuUsuario;
+    private final MenuExemplar menuExemplar;
+    private final MenuEmprestimo menuEmprestimo;
 
-    public MenuPrincipal(Scanner scanner) {
+    public MenuPrincipal(Scanner scanner, MenuLivro menuLivro, MenuUsuario menuUsuario,
+            MenuExemplar menuExemplar, MenuEmprestimo menuEmprestimo) {
         this.scanner = scanner;
+        this.menuLivro = menuLivro;
+        this.menuUsuario = menuUsuario;
+        this.menuExemplar = menuExemplar;
+        this.menuEmprestimo = menuEmprestimo;
     }
 
     public void iniciar() {
         int opcao;
         do {
             exibir();
-            opcao = lerOpcao();
-
+            opcao = LeitorConsole.lerInteiro(scanner, "Escolha uma opção: ");
             switch (opcao) {
-                case 1 -> System.out.println("Livros: em construção.");
-                case 2 -> System.out.println("Usuários: em construção.");
-                case 3 -> System.out.println("Exemplares: em construção.");
-                case 4 -> System.out.println("Empréstimos: em construção.");
+                case 1 -> menuLivro.iniciar();
+                case 2 -> menuUsuario.iniciar();
+                case 3 -> menuExemplar.iniciar();
+                case 4 -> menuEmprestimo.iniciar();
                 case 0 -> System.out.println("Encerrando o sistema...");
                 default -> System.out.println("Opção inválida.");
             }
@@ -39,14 +46,5 @@ public class MenuPrincipal {
                 4 - Empréstimos
                 0 - Sair
                 """);
-    }
-
-    private int lerOpcao() {
-        System.out.print("Escolha uma opção: ");
-        try {
-            return Integer.parseInt(scanner.nextLine().trim());
-        } catch (NumberFormatException e) {
-            return -1;
-        }
     }
 }
