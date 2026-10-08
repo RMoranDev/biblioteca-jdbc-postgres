@@ -35,3 +35,4 @@ target/
 db.properties
 
 src/main/java/com/biblioteca/TestConnection.java
+/tarefa.md
