@@ -33,3 +33,5 @@ target/
 
 # Configurações locais sensíveis
 db.properties
+
+src/main/java/com/biblioteca/TestConnection.java
